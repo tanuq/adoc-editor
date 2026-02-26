@@ -15,10 +15,14 @@ initEditor(editorPane, {
 
 initSidebar({
   onSelect: async (path) => {
-    const content = await readFile(path)
-    setContent(content)
-    toolbarFilename.textContent = path
-    document.getElementById('status-message').textContent = `Opened: ${path}`
+    try {
+      const content = await readFile(path)
+      setContent(content)
+      toolbarFilename.textContent = path
+      document.getElementById('status-message').textContent = `Opened: ${path}`
+    } catch (err) {
+      document.getElementById('status-message').textContent = `Error opening ${path}: ${err.message}`
+    }
   }
 })
 

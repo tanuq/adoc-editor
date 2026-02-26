@@ -1,4 +1,4 @@
-import { listFiles, deleteFile } from './api.js'
+import { listFiles, deleteFile, saveFile } from './api.js'
 
 let onSelectCallback = null
 let activeFile = null
@@ -10,20 +10,27 @@ export function initSidebar({ onSelect }) {
     const name = prompt('File name (e.g. notes.adoc):')
     if (!name) return
     const path = name.endsWith('.adoc') ? name : `${name}.adoc`
-    await fetch(`/api/files/${path}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content: `= ${name.replace('.adoc', '')}\n\n` })
-    })
-    await refreshSidebar()
-    selectFile(path)
+    const title = path.replace(/\.adoc$/, '')
+    try {
+      await saveFile(path, `= ${title}\n\n`)
+      await refreshSidebar()
+      selectFile(path)
+    } catch (err) {
+      alert(`Failed to create file: ${err.message}`)
+    }
   })
 
   refreshSidebar()
 }
 
 export async function refreshSidebar() {
-  const files = await listFiles()
+  let files
+  try {
+    files = await listFiles()
+  } catch (err) {
+    document.getElementById('status-message').textContent = `Error loading files: ${err.message}`
+    return
+  }
   const ul = document.getElementById('file-tree')
   ul.innerHTML = ''
   for (const f of files) {
@@ -39,9 +46,13 @@ export async function refreshSidebar() {
     del.addEventListener('click', async (e) => {
       e.stopPropagation()
       if (!confirm(`Delete ${f}?`)) return
-      await deleteFile(f)
-      if (activeFile === f) activeFile = null
-      await refreshSidebar()
+      try {
+        await deleteFile(f)
+        if (activeFile === f) activeFile = null
+        await refreshSidebar()
+      } catch (err) {
+        document.getElementById('status-message').textContent = `Error deleting ${f}: ${err.message}`
+      }
     })
     li.appendChild(del)
 
