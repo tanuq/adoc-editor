@@ -4,6 +4,8 @@ import { join } from 'path'
 import { spawn } from 'child_process'
 import { safeJoin } from '../lib/paths.js'
 
+const EXPORT_TIMEOUT_MS = 30000
+
 function runAsciidoctor(args) {
   return new Promise((resolve, reject) => {
     let settled = false
@@ -11,9 +13,16 @@ function runAsciidoctor(args) {
 
     const proc = spawn('asciidoctor', args, { stdio: ['ignore', 'pipe', 'pipe'] })
     const err = []
+
+    const timer = setTimeout(() => {
+      proc.kill()
+      done(reject, new Error('Export timed out'))
+    }, EXPORT_TIMEOUT_MS)
+
     proc.stderr.on('data', (d) => err.push(d))
-    proc.on('error', (e) => done(reject, e))
+    proc.on('error', (e) => { clearTimeout(timer); done(reject, e) })
     proc.on('close', (code) => {
+      clearTimeout(timer)
       if (code === 0) done(resolve, undefined)
       else done(reject, new Error(Buffer.concat(err).toString() || `Exit ${code}`))
     })
