@@ -1,5 +1,5 @@
-import { initEditor, setContent, getContent, toggleVim } from './editor.js'
-import { initSidebar, getActiveFile, refreshSidebar } from './sidebar.js'
+import { initEditor, setContent, toggleVim } from './editor.js'
+import { initSidebar, getActiveFile } from './sidebar.js'
 import { initPreview, sendPreview } from './preview.js'
 import { readFile, saveFile, exportFile } from './api.js'
 
@@ -12,7 +12,7 @@ const btnExportPdf = document.getElementById('btn-export-pdf')
 
 initPreview()
 
-let saveTimer = null
+const saveTimers = new Map()
 
 function setStatus(msg) {
   statusMessage.textContent = msg
@@ -21,18 +21,19 @@ function setStatus(msg) {
 initEditor(editorPane, {
   onChange: (text) => {
     sendPreview(text)
-    // Auto-save after 1 second idle
-    clearTimeout(saveTimer)
+    // Auto-save after 1 second idle (per-file timer to prevent cross-file cancellation)
     const path = getActiveFile()
     if (path) {
-      saveTimer = setTimeout(async () => {
+      clearTimeout(saveTimers.get(path))
+      saveTimers.set(path, setTimeout(async () => {
+        saveTimers.delete(path)
         try {
           await saveFile(path, text)
           setStatus(`Saved: ${path}`)
         } catch (err) {
           setStatus(`Save failed: ${err.message}`)
         }
-      }, 1000)
+      }, 1000))
     }
   },
   onCursor: (ln, col) => {
