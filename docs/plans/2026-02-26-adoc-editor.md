@@ -1057,10 +1057,7 @@ export function initPreview() {
 
   ws.onmessage = (event) => {
     const frame = document.getElementById('preview-frame')
-    const doc = frame.contentDocument || frame.contentWindow.document
-    doc.open()
-    doc.write(event.data)
-    doc.close()
+    frame.srcdoc = event.data
   }
 
   ws.onclose = () => {

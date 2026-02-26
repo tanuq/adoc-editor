@@ -23,6 +23,8 @@ app.use('/api/export', exportRouter(WORKSPACE))
 
 wss.on('connection', (ws) => handlePreview(ws))
 
+server.on('error', (err) => { console.error('Server error:', err.message); process.exit(1) })
+
 server.listen(PORT, () => {
   console.log(`adoc-editor listening on http://localhost:${PORT}`)
 })
