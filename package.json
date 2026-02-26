@@ -1,6 +1,7 @@
 {
   "name": "adoc-editor",
   "version": "1.0.0",
+  "private": true,
   "type": "module",
   "scripts": {
     "build": "esbuild frontend/main.js --bundle --outfile=public/bundle.js --format=esm",
