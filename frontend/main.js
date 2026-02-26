@@ -3,7 +3,7 @@ import { initEditor, setContent, getContent, toggleVim, isVimMode } from './edit
 const editorPane = document.getElementById('editor-pane')
 const btnKeybinding = document.getElementById('btn-keybinding')
 
-let view = initEditor(editorPane, {
+initEditor(editorPane, {
   onChange: (text) => { /* wired in Task 9 */ },
   onCursor: (ln, col) => {
     document.getElementById('status-cursor').textContent = `Ln ${ln}, Col ${col}`

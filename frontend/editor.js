@@ -79,6 +79,7 @@ export function getContent() {
 }
 
 export function toggleVim() {
+  if (!editorView) return vimMode
   vimMode = !vimMode
   const content = getContent()
   editorView.setState(
