@@ -1,0 +1,50 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body { font-family: sans-serif; font-size: 14px; height: 100vh; overflow: hidden; }
+
+#app { display: flex; height: 100vh; }
+
+/* Sidebar */
+#sidebar { width: 220px; min-width: 180px; background: #1e1e1e; color: #ccc;
+  display: flex; flex-direction: column; border-right: 1px solid #333; }
+#sidebar-header { display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 12px; font-weight: bold; border-bottom: 1px solid #333; }
+#sidebar-header button { background: none; border: 1px solid #555; color: #ccc;
+  cursor: pointer; width: 24px; height: 24px; font-size: 16px; border-radius: 3px; }
+#file-tree { list-style: none; overflow-y: auto; flex: 1; padding: 4px 0; }
+#file-tree li { padding: 5px 16px; cursor: pointer; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis; }
+#file-tree li:hover { background: #2a2a2a; }
+#file-tree li.active { background: #094771; color: #fff; }
+#file-tree li .delete-btn { float: right; visibility: hidden; color: #888;
+  background: none; border: none; cursor: pointer; }
+#file-tree li:hover .delete-btn { visibility: visible; }
+
+/* Main area */
+#main { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+
+/* Toolbar */
+#toolbar { display: flex; justify-content: space-between; align-items: center;
+  padding: 6px 12px; background: #252526; border-bottom: 1px solid #333;
+  color: #ccc; gap: 8px; }
+#toolbar-filename { font-size: 13px; color: #888; }
+#toolbar-actions { display: flex; gap: 6px; }
+#toolbar-actions button { background: #3a3a3a; border: 1px solid #555; color: #ccc;
+  padding: 3px 10px; cursor: pointer; border-radius: 3px; font-size: 12px; }
+#toolbar-actions button:hover { background: #4a4a4a; }
+#btn-keybinding.active { background: #094771; border-color: #0e7ab8; }
+
+/* Editor + Preview */
+#editor-preview { display: flex; flex: 1; overflow: hidden; }
+#editor-pane { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+#preview-pane { flex: 1; border-left: 1px solid #333; overflow: hidden; }
+#preview-frame { width: 100%; height: 100%; border: none; background: #fff; }
+
+/* CodeMirror fill height */
+.cm-editor { height: 100%; }
+.cm-scroller { overflow: auto; }
+
+/* Status bar */
+#statusbar { display: flex; justify-content: space-between; align-items: center;
+  padding: 3px 12px; background: #007acc; color: #fff; font-size: 12px; }
+#status-right { display: flex; gap: 16px; }
