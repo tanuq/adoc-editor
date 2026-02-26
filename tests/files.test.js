@@ -53,3 +53,15 @@ test('DELETE removes file', async () => {
   await request(app).delete('/api/files/del.adoc').expect(200)
   await request(app).get('/api/files/del.adoc').expect(404)
 })
+
+test('GET rejects path traversal', async () => {
+  const res = await request(app).get('/api/files/..%2fetc%2fpasswd')
+  expect(res.status).toBe(400)
+})
+
+test('POST rejects path traversal', async () => {
+  const res = await request(app)
+    .post('/api/files/..%2fetc%2fpasswd')
+    .send({ content: 'evil' })
+  expect(res.status).toBe(400)
+})

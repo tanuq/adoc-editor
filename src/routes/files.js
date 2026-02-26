@@ -1,6 +1,13 @@
 import { Router } from 'express'
-import { readFile, writeFile, unlink, readdir, stat, mkdir } from 'fs/promises'
-import { join, relative, dirname } from 'path'
+import { readFile, writeFile, unlink, readdir, mkdir } from 'fs/promises'
+import { join, dirname, resolve } from 'path'
+
+function safeJoin(workspace, userPath) {
+  const resolved = resolve(join(workspace, userPath))
+  const base = resolve(workspace)
+  if (!resolved.startsWith(base + '/') && resolved !== base) return null
+  return resolved
+}
 
 async function listAdoc(dir, base = '') {
   const entries = await readdir(join(dir, base || '.'), { withFileTypes: true }).catch(() => [])
@@ -27,31 +34,40 @@ export default function filesRouter(workspace) {
 
   // Read a file
   router.get('/*', async (req, res) => {
-    const filePath = join(workspace, req.params[0])
+    const filePath = safeJoin(workspace, req.params[0])
+    if (!filePath) return res.status(400).json({ error: 'Invalid path' })
     try {
       const content = await readFile(filePath, 'utf8')
       res.json({ content })
-    } catch {
-      res.status(404).json({ error: 'Not found' })
+    } catch (e) {
+      if (e.code === 'ENOENT') res.status(404).json({ error: 'Not found' })
+      else res.status(500).json({ error: 'Read failed' })
     }
   })
 
   // Create or overwrite a file
   router.post('/*', async (req, res) => {
-    const filePath = join(workspace, req.params[0])
-    await mkdir(dirname(filePath), { recursive: true })
-    await writeFile(filePath, req.body.content ?? '', 'utf8')
-    res.json({ ok: true })
+    const filePath = safeJoin(workspace, req.params[0])
+    if (!filePath) return res.status(400).json({ error: 'Invalid path' })
+    try {
+      await mkdir(dirname(filePath), { recursive: true })
+      await writeFile(filePath, req.body.content ?? '', 'utf8')
+      res.json({ ok: true })
+    } catch (e) {
+      res.status(500).json({ error: 'Write failed' })
+    }
   })
 
   // Delete a file
   router.delete('/*', async (req, res) => {
-    const filePath = join(workspace, req.params[0])
+    const filePath = safeJoin(workspace, req.params[0])
+    if (!filePath) return res.status(400).json({ error: 'Invalid path' })
     try {
       await unlink(filePath)
       res.json({ ok: true })
-    } catch {
-      res.status(404).json({ error: 'Not found' })
+    } catch (e) {
+      if (e.code === 'ENOENT') res.status(404).json({ error: 'Not found' })
+      else res.status(500).json({ error: 'Delete failed' })
     }
   })
 
