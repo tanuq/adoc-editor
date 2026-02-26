@@ -1,0 +1,10 @@
+services:
+  adoc-editor:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./docs:/workspace/mounted
+    environment:
+      - WORKSPACE=/workspace/mounted
+      - PORT=3000
