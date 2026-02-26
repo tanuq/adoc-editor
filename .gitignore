@@ -1,0 +1,6 @@
+node_modules/
+public/bundle.js
+*.pdf
+*.html
+!public/index.html
+!public/style.css
