@@ -1,13 +1,7 @@
 import { Router } from 'express'
 import { readFile, writeFile, unlink, readdir, mkdir } from 'fs/promises'
-import { join, dirname, resolve } from 'path'
-
-function safeJoin(workspace, userPath) {
-  const resolved = resolve(join(workspace, userPath))
-  const base = resolve(workspace)
-  if (!resolved.startsWith(base + '/') && resolved !== base) return null
-  return resolved
-}
+import { join, dirname } from 'path'
+import { safeJoin } from '../lib/paths.js'
 
 async function listAdoc(dir, base = '') {
   const entries = await readdir(join(dir, base || '.'), { withFileTypes: true }).catch(() => [])

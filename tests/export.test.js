@@ -40,3 +40,8 @@ test('POST /api/export/pdf/foo.adoc saves foo.pdf', async () => {
 test('returns 404 for non-existent file', async () => {
   await request(app).post('/api/export/html/nope.adoc').expect(404)
 })
+
+test('returns 400 for path traversal attempt', async () => {
+  const res = await request(app).post('/api/export/html/..%2fetc%2fpasswd')
+  expect(res.status).toBe(400)
+})
