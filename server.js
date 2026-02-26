@@ -11,7 +11,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 
 const app = express()
 const server = createServer(app)
-const wss = new WebSocketServer({ server, path: '/ws/preview' })
+const wss = new WebSocketServer({ server, path: '/ws/preview', maxPayload: 10 * 1024 * 1024 })
 
 const PORT = process.env.PORT || 3000
 const WORKSPACE = process.env.WORKSPACE || './workspace'

@@ -28,3 +28,14 @@ test('renders adoc text and returns HTML', (done) => {
     done()
   })
 }, 15000) // asciidoctor CLI may be slow
+
+test('handlePreview sends error for oversized input', (done) => {
+  const ws = new WebSocket(`ws://localhost:${port}/ws/preview`)
+  const bigText = 'x'.repeat(11 * 1024 * 1024) // 11 MB
+  ws.on('open', () => ws.send(bigText))
+  ws.on('message', (data) => {
+    expect(data.toString()).toContain('Error: input too large')
+    ws.close()
+    done()
+  })
+}, 5000)
