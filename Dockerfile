@@ -4,7 +4,7 @@ RUN apk add --no-cache nodejs npm
 
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci --omit=dev && npm install --save-dev esbuild codemirror @replit/codemirror-vim @codemirror/legacy-modes @codemirror/language @codemirror/view @codemirror/state
+RUN npm ci
 COPY . .
 RUN npm run build
 
