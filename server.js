@@ -21,7 +21,10 @@ app.use(express.static(join(__dirname, 'public')))
 app.use('/api/files', filesRouter(WORKSPACE))
 app.use('/api/export', exportRouter(WORKSPACE))
 
-wss.on('connection', (ws) => handlePreview(ws))
+wss.on('connection', (ws) => handlePreview(ws).catch((err) => {
+  console.error('Preview session error:', err.message)
+  ws.close()
+}))
 
 server.on('error', (err) => { console.error('Server error:', err.message); process.exit(1) })
 

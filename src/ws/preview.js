@@ -6,8 +6,17 @@ import { tmpdir } from 'os'
 const RENDER_TIMEOUT_MS = 10000
 const MAX_TEXT_BYTES = 10 * 1024 * 1024 // 10 MB
 
-export function handlePreview(ws) {
+export async function handlePreview(ws) {
   ws.on('error', () => {}) // prevent crash on send to closed socket
+
+  // Create temp dir once per connection, reuse for all renders
+  const dir = await mkdtemp(join(tmpdir(), 'adoc-preview-'))
+  const srcFile = join(dir, 'input.adoc')
+  const outFile = join(dir, 'input.html')
+
+  ws.on('close', () => {
+    rm(dir, { recursive: true, force: true }).catch(() => {})
+  })
 
   ws.on('message', (data) => {
     if (data.length > MAX_TEXT_BYTES) {
@@ -15,7 +24,7 @@ export function handlePreview(ws) {
       return
     }
     const adocText = data.toString()
-    renderAdoc(adocText)
+    renderAdoc(adocText, srcFile, outFile)
       .then((html) => { if (ws.readyState === ws.OPEN) ws.send(html) })
       .catch((err) => { if (ws.readyState === ws.OPEN) ws.send(`<pre>Error: ${escapeHtml(err.message)}</pre>`) })
   })
@@ -25,10 +34,14 @@ function escapeHtml(str) {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }
 
-export async function renderAdoc(text) {
-  const dir = await mkdtemp(join(tmpdir(), 'adoc-preview-'))
-  const srcFile = join(dir, 'input.adoc')
-  const outFile = join(dir, 'input.html')
+export async function renderAdoc(text, srcFile, outFile) {
+  // When called from tests, create a temp dir if paths not provided
+  let tmpDir = null
+  if (!srcFile || !outFile) {
+    tmpDir = await mkdtemp(join(tmpdir(), 'adoc-preview-'))
+    srcFile = join(tmpDir, 'input.adoc')
+    outFile = join(tmpDir, 'input.html')
+  }
 
   try {
     await writeFile(srcFile, text, 'utf8')
@@ -62,6 +75,6 @@ export async function renderAdoc(text) {
 
     return await readFile(outFile, 'utf8')
   } finally {
-    await rm(dir, { recursive: true, force: true })
+    if (tmpDir) await rm(tmpDir, { recursive: true, force: true })
   }
 }
