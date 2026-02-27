@@ -43,7 +43,7 @@ function buildTree(paths) {
 function renderTree(node, dirPath, depth, ul) {
   const indent = 16 + depth * 12
 
-  for (const [name, sub] of Object.entries(node.dirs).sort()) {
+  for (const [name, sub] of Object.entries(node.dirs).sort(([a], [b]) => a.localeCompare(b))) {
     const fullDirPath = dirPath ? `${dirPath}/${name}` : name
     const collapsed = collapsedDirs.has(fullDirPath)
 
