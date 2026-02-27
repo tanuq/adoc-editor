@@ -9,14 +9,16 @@ const MAX_TEXT_BYTES = 10 * 1024 * 1024 // 10 MB
 export async function handlePreview(ws) {
   ws.on('error', () => {}) // prevent crash on send to closed socket
 
+  // Register close handler before async work to avoid race condition
+  let dir = null
+  ws.on('close', () => {
+    if (dir) rm(dir, { recursive: true, force: true }).catch(() => {})
+  })
+
   // Create temp dir once per connection, reuse for all renders
-  const dir = await mkdtemp(join(tmpdir(), 'adoc-preview-'))
+  dir = await mkdtemp(join(tmpdir(), 'adoc-preview-'))
   const srcFile = join(dir, 'input.adoc')
   const outFile = join(dir, 'input.html')
-
-  ws.on('close', () => {
-    rm(dir, { recursive: true, force: true }).catch(() => {})
-  })
 
   ws.on('message', (data) => {
     if (data.length > MAX_TEXT_BYTES) {
