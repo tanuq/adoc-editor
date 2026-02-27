@@ -1,6 +1,6 @@
 import { spawn } from 'child_process'
 import { mkdtemp, writeFile, readFile, rm } from 'fs/promises'
-import { join } from 'path'
+import { join, dirname } from 'path'
 import { tmpdir } from 'os'
 
 const RENDER_TIMEOUT_MS = 10000
@@ -57,7 +57,7 @@ export async function renderAdoc(text, srcFile, outFile) {
         '-a', 'data-uri',
         '-o', outFile,
         srcFile
-      ], { stdio: ['ignore', 'pipe', 'pipe'] })
+      ], { stdio: ['ignore', 'pipe', 'pipe'], cwd: dirname(srcFile) })
 
       const errChunks = []
 

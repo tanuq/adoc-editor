@@ -1,3 +1,58 @@
 = Hello World
 
-This is a test.
+This is a test. +
+日本語だめかな？
+
+[plantuml]
+....
+:利用者: --> (Use)
+"管理者" as Admin
+"ユーザー用画面" as (Use)
+Admin --> (管理者画面)
+....
+
+[plantuml]
+....
+class 会社員
+class 技術社員
+class 会社
+"会社員"  <- "技術社員"
+....
+ 
+=== mermaid
+ 
+mermaid も直接書ける
+ 
+.mermaidの例
+[mermaid]
+....
+flowchart LR
+    A[Hard edge] -->|Link text| B(Round edge)
+    B --> C{Decision}
+    C -->|One| D[Result one]
+    C -->|Two| E[Result two]
+....
+
+
+[plantuml]
+....
+start
+:処理1;
+if (条件) then (yes)
+  :処理2;
+else (no)
+  :処理3;
+endif
+:処理4;
+:処理4;
+:処理4;
+:処理4;
+:処理4;
+:処理4;
+:処理4;
+:処理4;
+:処理4;
+:処理4;
+:処理4;
+stop
+....

@@ -1,12 +1,8 @@
 import { Router } from 'express'
 import { access } from 'fs/promises'
 import { join, dirname } from 'path'
-import { fileURLToPath } from 'url'
 import { spawn } from 'child_process'
 import { safeJoin } from '../lib/paths.js'
-
-const __dirname = dirname(fileURLToPath(import.meta.url))
-const PDF_THEME = join(__dirname, '../../themes/pdf-japanese.yml')
 
 const EXPORT_TIMEOUT_MS = 30000
 
@@ -62,9 +58,6 @@ export default function exportRouter(workspace) {
 
   router.post('/html/*', (req, res) =>
     doExport(workspace, req.params[0], '.html', ['-r', 'asciidoctor-diagram', '-a', 'data-uri'], res))
-
-  router.post('/pdf/*', (req, res) =>
-    doExport(workspace, req.params[0], '.pdf', ['-r', 'asciidoctor-diagram', '-r', 'asciidoctor-pdf', '-b', 'pdf', '-a', `pdf-theme=${PDF_THEME}`], res))
 
   return router
 }

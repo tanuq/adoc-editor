@@ -8,7 +8,6 @@ const btnKeybinding = document.getElementById('btn-keybinding')
 const toolbarFilename = document.getElementById('toolbar-filename')
 const statusMessage = document.getElementById('status-message')
 const btnExportHtml = document.getElementById('btn-export-html')
-const btnExportPdf = document.getElementById('btn-export-pdf')
 
 initPreview()
 
@@ -75,14 +74,3 @@ btnExportHtml.addEventListener('click', async () => {
   }
 })
 
-btnExportPdf.addEventListener('click', async () => {
-  const path = getActiveFile()
-  if (!path) return setStatus('No file open')
-  setStatus('Exporting PDF...')
-  try {
-    const res = await exportFile('pdf', path)
-    setStatus(res.ok ? `Saved: ${res.path}` : `Error: ${res.error}`)
-  } catch (err) {
-    setStatus(`Export failed: ${err.message}`)
-  }
-})

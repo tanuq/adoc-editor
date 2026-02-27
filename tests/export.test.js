@@ -27,16 +27,6 @@ test('POST /api/export/html/foo.adoc saves foo.html', async () => {
   await expect(access(join(tmpDir, 'foo.html'))).resolves.toBeUndefined()
 }, 15000)
 
-test('POST /api/export/pdf/foo.adoc saves foo.pdf', async () => {
-  await writeFile(join(tmpDir, 'foo.adoc'), '= Test\n\nHello.')
-
-  const res = await request(app).post('/api/export/pdf/foo.adoc')
-  expect(res.status).toBe(200)
-  expect(res.body.path).toBe('foo.pdf')
-
-  await expect(access(join(tmpDir, 'foo.pdf'))).resolves.toBeUndefined()
-}, 15000)
-
 test('returns 404 for non-existent file', async () => {
   await request(app).post('/api/export/html/nope.adoc').expect(404)
 })

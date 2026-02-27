@@ -26340,7 +26340,6 @@ var btnKeybinding = document.getElementById("btn-keybinding");
 var toolbarFilename = document.getElementById("toolbar-filename");
 var statusMessage = document.getElementById("status-message");
 var btnExportHtml = document.getElementById("btn-export-html");
-var btnExportPdf = document.getElementById("btn-export-pdf");
 initPreview();
 var saveTimers = /* @__PURE__ */ new Map();
 function setStatus(msg) {
@@ -26393,17 +26392,6 @@ btnExportHtml.addEventListener("click", async () => {
   setStatus("Exporting HTML...");
   try {
     const res = await exportFile("html", path);
-    setStatus(res.ok ? `Saved: ${res.path}` : `Error: ${res.error}`);
-  } catch (err) {
-    setStatus(`Export failed: ${err.message}`);
-  }
-});
-btnExportPdf.addEventListener("click", async () => {
-  const path = getActiveFile();
-  if (!path) return setStatus("No file open");
-  setStatus("Exporting PDF...");
-  try {
-    const res = await exportFile("pdf", path);
     setStatus(res.ok ? `Saved: ${res.path}` : `Error: ${res.error}`);
   } catch (err) {
     setStatus(`Export failed: ${err.message}`);
