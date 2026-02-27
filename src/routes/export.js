@@ -1,17 +1,21 @@
 import { Router } from 'express'
 import { access } from 'fs/promises'
-import { join } from 'path'
+import { join, dirname } from 'path'
+import { fileURLToPath } from 'url'
 import { spawn } from 'child_process'
 import { safeJoin } from '../lib/paths.js'
 
+const __dirname = dirname(fileURLToPath(import.meta.url))
+const PDF_THEME = join(__dirname, '../../themes/pdf-japanese.yml')
+
 const EXPORT_TIMEOUT_MS = 30000
 
-function runAsciidoctor(args) {
+function runAsciidoctor(args, cwd) {
   return new Promise((resolve, reject) => {
     let settled = false
     const done = (fn, val) => { if (!settled) { settled = true; fn(val) } }
 
-    const proc = spawn('asciidoctor', args, { stdio: ['ignore', 'pipe', 'pipe'] })
+    const proc = spawn('asciidoctor', args, { stdio: ['ignore', 'pipe', 'pipe'], cwd })
     const err = []
 
     const timer = setTimeout(() => {
@@ -46,7 +50,7 @@ async function doExport(workspace, relPath, outExt, asciidoctorArgs, res) {
   const outRel = relPath.replace(/\.adoc$/, outExt)
 
   try {
-    await runAsciidoctor([...asciidoctorArgs, '-o', outPath, srcPath])
+    await runAsciidoctor([...asciidoctorArgs, '-o', outPath, srcPath], dirname(srcPath))
     res.json({ ok: true, path: outRel })
   } catch (e) {
     res.status(500).json({ error: e.message })
@@ -60,7 +64,7 @@ export default function exportRouter(workspace) {
     doExport(workspace, req.params[0], '.html', ['-r', 'asciidoctor-diagram', '-a', 'data-uri'], res))
 
   router.post('/pdf/*', (req, res) =>
-    doExport(workspace, req.params[0], '.pdf', ['-r', 'asciidoctor-diagram', '-r', 'asciidoctor-pdf', '-b', 'pdf'], res))
+    doExport(workspace, req.params[0], '.pdf', ['-r', 'asciidoctor-diagram', '-r', 'asciidoctor-pdf', '-b', 'pdf', '-a', `pdf-theme=${PDF_THEME}`], res))
 
   return router
 }

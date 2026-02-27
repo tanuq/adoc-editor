@@ -1,0 +1,15 @@
+extends: default
+font:
+  catalog:
+    Noto Serif:
+      normal: GEM_FONTS_DIR/notoserif-regular-subset.ttf
+      bold: GEM_FONTS_DIR/notoserif-bold-subset.ttf
+      italic: GEM_FONTS_DIR/notoserif-italic-subset.ttf
+      bold_italic: GEM_FONTS_DIR/notoserif-bold_italic-subset.ttf
+    NotoSansJP:
+      normal: /usr/share/fonts/noto/NotoSansCJK-Regular.ttc
+      bold: /usr/share/fonts/noto/NotoSansCJK-Bold.ttc
+      italic: /usr/share/fonts/noto/NotoSansCJK-Regular.ttc
+      bold_italic: /usr/share/fonts/noto/NotoSansCJK-Bold.ttc
+  fallbacks:
+    - NotoSansJP
