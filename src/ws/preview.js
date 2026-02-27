@@ -1,4 +1,7 @@
 import { spawn } from 'child_process'
+import { mkdtemp, writeFile, readFile, rm } from 'fs/promises'
+import { join } from 'path'
+import { tmpdir } from 'os'
 
 const RENDER_TIMEOUT_MS = 10000
 const MAX_TEXT_BYTES = 10 * 1024 * 1024 // 10 MB
@@ -22,36 +25,43 @@ function escapeHtml(str) {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }
 
-export function renderAdoc(text) {
-  return new Promise((resolve, reject) => {
-    const proc = spawn('asciidoctor', ['-o', '-', '-'], {
-      stdio: ['pipe', 'pipe', 'pipe']
+export async function renderAdoc(text) {
+  const dir = await mkdtemp(join(tmpdir(), 'adoc-preview-'))
+  const srcFile = join(dir, 'input.adoc')
+  const outFile = join(dir, 'input.html')
+
+  try {
+    await writeFile(srcFile, text, 'utf8')
+
+    await new Promise((resolve, reject) => {
+      let settled = false
+      const done = (fn, val) => { if (!settled) { settled = true; fn(val) } }
+
+      const proc = spawn('asciidoctor', [
+        '-r', 'asciidoctor-diagram',
+        '-a', 'data-uri',
+        '-o', outFile,
+        srcFile
+      ], { stdio: ['ignore', 'pipe', 'pipe'] })
+
+      const errChunks = []
+
+      const timer = setTimeout(() => {
+        proc.kill()
+        done(reject, new Error('Render timed out'))
+      }, RENDER_TIMEOUT_MS)
+
+      proc.on('error', (err) => { clearTimeout(timer); done(reject, err) })
+      proc.stderr.on('data', (d) => errChunks.push(d))
+      proc.on('close', (code) => {
+        clearTimeout(timer)
+        if (code === 0) done(resolve, undefined)
+        else done(reject, new Error(Buffer.concat(errChunks).toString() || `Exit code ${code}`))
+      })
     })
-    const chunks = []
-    const errChunks = []
 
-    const timer = setTimeout(() => {
-      proc.kill()
-      reject(new Error('Render timed out'))
-    }, RENDER_TIMEOUT_MS)
-
-    proc.on('error', (err) => {
-      clearTimeout(timer)
-      reject(err)
-    })
-
-    proc.stdout.on('data', (d) => chunks.push(d))
-    proc.stderr.on('data', (d) => errChunks.push(d))
-
-    proc.on('close', (code) => {
-      clearTimeout(timer)
-      if (code === 0) {
-        resolve(Buffer.concat(chunks).toString())
-      } else {
-        reject(new Error(Buffer.concat(errChunks).toString() || `Exit code ${code}`))
-      }
-    })
-
-    proc.stdin.end(text)  // write + close in one call (handles backpressure correctly)
-  })
+    return await readFile(outFile, 'utf8')
+  } finally {
+    await rm(dir, { recursive: true, force: true })
+  }
 }

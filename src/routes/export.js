@@ -57,10 +57,10 @@ export default function exportRouter(workspace) {
   const router = Router()
 
   router.post('/html/*', (req, res) =>
-    doExport(workspace, req.params[0], '.html', ['-a', 'data-uri'], res))
+    doExport(workspace, req.params[0], '.html', ['-r', 'asciidoctor-diagram', '-a', 'data-uri'], res))
 
   router.post('/pdf/*', (req, res) =>
-    doExport(workspace, req.params[0], '.pdf', ['-r', 'asciidoctor-pdf', '-b', 'pdf'], res))
+    doExport(workspace, req.params[0], '.pdf', ['-r', 'asciidoctor-diagram', '-r', 'asciidoctor-pdf', '-b', 'pdf'], res))
 
   return router
 }
