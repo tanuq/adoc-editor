@@ -69,9 +69,9 @@ export function initEditor(container, { onChange, onCursor } = {}) {
 
 export function setContent(content) {
   if (!editorView) return
-  editorView.dispatch({
-    changes: { from: 0, to: editorView.state.doc.length, insert: content }
-  })
+  editorView.setState(
+    EditorState.create({ doc: content, extensions: buildExtensions() })
+  )
 }
 
 export function getContent() {
